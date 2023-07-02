@@ -19,6 +19,9 @@ public class ArrayList<E> implements ListInterface<E> {
     }
 
     // [알고리즘 5-1] 구현: 배열 리스트의 k번째 자리에 원소 x 삽입하기
+    // -> 참고사항: 여기서는 구현하지 않았지만,
+    // -> ArrayList의 공간이 다 차면,
+    // -> 더 큰 배열을 할당해서 원소들을 모두 옮겨주는 작업을 한다.
     @Override
     public void add(int index, E x) {
         if (numItems >= item.length || index < 0 || index > numItems) {
