@@ -10,7 +10,7 @@ public interface ListInterface<E> {
 
     public boolean removeItem(E x);
 
-    public Integer get(int i);
+    public E get(int i);
 
     public void set(int i, E x);
 
