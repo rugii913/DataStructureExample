@@ -27,6 +27,7 @@ public class LinkedList<E> implements ListInterface<E> {
             prevNode = prevNode.next;
         }
         prevNode.next = new Node<>(item, null);
+        numItems++;
     }
 
     // [알고리즘 5-12] 구현: 리스트의 원소 삭제하기
