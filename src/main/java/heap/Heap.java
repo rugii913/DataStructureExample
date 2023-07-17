@@ -103,7 +103,7 @@ public class Heap<E extends Comparable> implements PQInterface<E> {
     // [알고리즘 8-7] 구현: 힙 비우기
     @Override
     public void clear() {
-        heapArray = (E[]) new Object[heapArray.length];
+        heapArray = (E[]) new Comparable[heapArray.length];
         numItems = 0;
     }
 }
