@@ -1,5 +1,7 @@
 package sorting;
 
+import list.LinkedList;
+
 public class Sorting {
 
     int array[];
@@ -228,6 +230,154 @@ public class Sorting {
             // j 위치에 두면, h를 한 번 더 뺀 상태가 됨.
             // ex. h = 7이고, 현재 j = 6으로 작업을 마친 후 다시 반복해야하는 상황을 생각해볼 것
             // => j = -1로 바뀌고 튕겨져 나감 => +7을 해줘야 생각했던 곳 j = 6에 위치하게 된다.
+        }
+    }
+    
+    // [알고리즘 9-12] 구현: 계수 정렬 - 정렬하고자 하는 원소들의 값이 -O(n) ~ O(n)의 범위에 있는 정수인 경우
+    public int[] countingSort(int k) { // A[0 ... n-1] belong to integers 0 ~ k-1
+        /*처음부터 봐야 함*/
+        int[] cnt = new int[k];
+
+        for (int i = 0; i < k; i++) {
+            cnt[i] = 0;  // cnt 모든 값 0으로 초기화
+        }
+
+        // 알고리즘 9-12의 2번 부분: cnt[i]는 값이 i인 원소의 총 후
+        for (int i = 0; i < array.length; i++) {
+            cnt[array[i]]++;
+        }
+
+        // 알고리즘 9-12의 3번 부분: 누적합 계산
+        cnt[0]--;
+        // => p.308에서는 tempArray[cnt[array[j]] - 1] = array[j]로 되어있었는데, (cnt[i] - 1 위치에 i가 뒤에서 처음 등장)
+        // tempArray[cnt[array[j]]] = array[j]로 바꿨다. (cnt[i] 위치에 i가 뒤에서 처음 등장)
+        for (int i = 1; i < k; i++) {
+            cnt[i] += cnt[i - 1];
+        }
+
+        // 알고리즘 9-12의 4번 부분: 원소들을 count에 맞춰 배치한 뒤 반환
+        int[] tempArray = new int[array.length];
+        // stable sorting을 만들기 위해 역순으로 순회
+        // 지금은 단순한 기초 타입 int이지만 객체를 비교한다면, 비교 대상인 필드 외에 순서를 stable하게 유지하는 것이 의미있는 다른 정보가 있을 수도 있다.
+        // 예를 들어 엑셀로 부서원 정보를 관리한다고 했을 때, 이름으로 오름차순 조회 후 부서로 다시 오름차순 조회하는 경우를 생각해보자.
+        for (int j = array.length - 1; j >= 0; j--) {
+            tempArray[cnt[array[j]]] = array[j];
+            cnt[array[j]]--;
+        }
+
+        return tempArray;
+    }
+    
+    // [알고리즘 9-13] 구현: 기수 정렬 - 상수 k개 이하의 자릿수를 가진 자연수와 같은 특수한 경우, 혹은 제한된 길이를 가진 알파벳들인 경우
+    public void radixSort() { // A[0 ... n-1]은 최대 numDigits 자릿수의 양의 정수
+        int[] cnt = new int[10], start = new int[10];
+        int[] tempArray = new int[array.length];
+
+        // 최대 자릿수 계산
+        int max = -1;
+        for (int i = 0; i < array.length; i++) { // 비교해서 가장 큰 수를 찾기  
+            if (array[i] > max) {
+                max = array[i];
+            }
+        }
+        int numDigits = (int) Math.log10(max) + 1; // ex. max == 1234 라면 numDigits는 4
+
+        for (int digit = 1; digit <= numDigits; digit++) { // for가 중첩되어 있지만 배열의 크기 n과 관련이 없다.
+            for (int d = 0; d <= 9; d++) { // cnt: 각 자릿수에서 작업할 때 i가 몇 개 들어있는지를 카운트한 것
+                cnt[d] = 0; // 각 digit에서의 작업마다 cnt의 모든 원소를 0으로 초기화
+            }
+
+            for (int i = 0; i < array.length; i++) { // n과 관련이 있는 부분 - n번 순회하며 해당 자릿수의 값이 몇 개인지 count
+                cnt[(int)(array[i] / Math.pow(10, digit - 1)) % 10]++;
+                // pow(a, b)는 a^b를 반환 => (int)(array[i] / Math.pow(10, digit - 1)) % 10는 자릿수의 값을 반환하게 되어있음
+                /*
+                * cnt[array[i] % (int) Math.pow(10, digit)]++;로 해도 동일하지 않을까? - x 아님, ex. 4324를 10^2로 나눈 나머지는 24
+                * 해당 자릿수 아래 자릿수를 없애버리기 위해 이런 식으로 작업한 것
+                * */
+            }
+            // ex. 10^0 자릿수 작업 - array = [14, 2345, 1234, 111]라면 cnt[1] = 1, cnt[4] = 2, cnt[5] = 1인 상태
+
+            start[0] = 0;
+            for (int d = 1; d <= 9; d++) {
+                start[d] = start[d - 1] + cnt[d - 1];
+            }
+            // 계수 정렬에서 했던 것처럼 누적합과 유사
+            // ex. 10^0 자릿수 작업 - array = [14, 2345, 1234, 111]라면
+            // start[1] = 0, start[2] = 1, ..., start[4] = 1, start[5] = 3, start[6] = 4인 상태
+
+            for (int i = 0; i < array.length; i++) {
+                tempArray[start[(int) (array[i] / Math.pow(10, digit - 1)) % 10]++] = array[i];
+            }
+            // ex. 10^0 자릿수 작업 - array = [14, 2345, 1234, 111]라면
+            // (int) (array[i] / Math.pow(10, digit - 1)) % 10: array[i]의 10^0 자릿수 값을 나타냄을 생각하면서
+            // i = 0일 때, tempArray[start[4]++] = array[0] => tempArray[1] = array[0] 그리고 ++에 의해 start[4] = 2
+            // i = 1일 때, tempArray[start[5]++] = array[1] => tempArray[3] = array[1] 그리고 ++에 의해 start[5] = 4
+            // i = 2일 때, tempArray[start[4]++] = array[2] => tempArray[2] = array[2] 그리고 ++에 의해 start[4] = 3
+            // i = 3일 때, tempArray[start[1]++] = array[3] => tempArray[0] = array[3] 그리고 ++에 의해 start[1] = 1
+            // => tempArray = [111, 14, 1234, 2345]
+
+            for (int i = 0; i < array.length; i++) {
+                array[i] = tempArray[i];
+            }
+            // ex. 10^0 자릿수 작업 - array = [14, 2345, 1234, 111]였다면
+            // => array = [111, 14, 1234, 2345]: 10^자릿수에 대해 정렬 완료
+            // cf. stable sorting으로 순서 유지됨
+            // 특정 자릿수에 대한 작업 끝, 다시 for문 앞으로 돌아가서 더 큰 자릿수에 대해 작업
+        }
+    }
+    
+    // [알고리즘 9-14] 구현: 버킷 정렬 - 균등 분포를 가정할 때
+    public void bucketSort() {
+        // 일단 이 구현 코드에서는 A[0 ... ]: 음이 아닌 정수 범위에서 균등 분포 배열인 경우 가정
+        LinkedList<Integer> tempArray[];
+        int numLists = array.length; // array의 length == 링크드리스트의 개수 == tempArray의 length
+        tempArray = new LinkedList[numLists];
+
+        for (int i = 0; i < numLists; i++) { // tempArray[] 각 원소를 빈 링크드리스트로 초기화
+            tempArray[i] = new LinkedList();
+        }
+
+        int max;
+        if (array[0] < array[1]) {
+            max = 1;
+        } else {
+            max = 0;
+        }
+
+        for (int i = 2; i < array.length; i++) {
+            if (array[max] < array[i]) {
+                max = i;
+            }
+        }
+
+        int band = array[max] + 1;
+        int bucketId;
+        for (int i = 0; i < array.length; i++) {
+            bucketId = (int) ((float) (array[i] / band) * numLists);
+            tempArray[bucketId].add(0, array[i]);
+        }
+
+        int finger = 0;
+        int p, r = -1;
+        for (int i = 0; i < numLists; i++) {
+            for (int j = 0; j < tempArray[i].len(); j++) {
+                array[finger++] = tempArray[i].getNode(j).item;
+            }
+            p = r + 1;
+            r = finger -1;
+            rangeInsertionSort(p, r);
+        }
+    }
+
+    private void rangeInsertionSort(int p, int r) {
+        for (int i = p + 1; i <= r; i++) {
+            int loc = i - 1;
+            int x = array[i];
+            while (loc >= p && x < array[loc]) {
+                array[loc + 1] = array[loc];
+                loc--;
+            }
+            array[loc + 1] = x;
         }
     }
 }
