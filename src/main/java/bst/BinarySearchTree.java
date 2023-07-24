@@ -47,6 +47,7 @@ public class BinarySearchTree implements IndexInterface<TreeNode> {
     @Override
     public void delete(Comparable searchKey) {
         root = deleteItem(root, searchKey);
+        // cf. 현재 구현에서, 없는 키 값을 삭제하려고 시도할 때 처리가 없음
     }
 
     private TreeNode deleteItem(TreeNode tNode, Comparable searchKey) { // 삭제할 노드를 찾는 작업
