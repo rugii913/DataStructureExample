@@ -57,6 +57,8 @@
   "C_Cpp_Runner.useLinkTimeOptimization": false,
   "files.associations": {
     "stdlib.h": "c",
-    "conio.h": "c"
-  }
+    "conio.h": "c",
+    "ch01_IntroductionToC.C": "cpp"
+  },
+  "C_Cpp_Runner.msvcSecureNoWarnings": false
 }
